@@ -3,7 +3,7 @@ var monthnames = ['January', 'February', 'March', 'April', 'May', 'June', 'July'
 
 function init() {
     updateDateAndTime();
-    setupOriginalNewTabLink();
+    setupOriginalNewTabLinkAndDoubleClick();
 }
 
 function updateDateAndTime() {
@@ -31,12 +31,18 @@ function updateDateAndTime() {
     }, 1000);
 }
 
-function setupOriginalNewTabLink() {
-    $('.original-new-tab').click(function(){
+function setupOriginalNewTabLinkAndDoubleClick() {
+    $original_tab_link = $('.original-new-tab');
+
+    $original_tab_link.click(function(){
         chrome.tabs.update({
             url:'chrome-internal://newtab/'
         });
         return false;
+    });
+
+    $(document).dblclick(function(){
+        $original_tab_link.click();
     });
 }
 
