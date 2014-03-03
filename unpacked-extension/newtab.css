@@ -1,0 +1,9 @@
+html[manifest*="chrome/newtab"] {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    background: #fff;
+}
