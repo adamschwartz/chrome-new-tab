@@ -1,0 +1,13 @@
+{
+   "chrome_url_overrides": {
+      "newtab": "ntp.html"
+   },
+   "description": "Blank NTP. Fuck U Google!",
+   "icons": {
+      "128": "icon128.png"
+   },
+   "incognito": "split",
+   "manifest_version": 2,
+   "name": "Blank NTP",
+   "version": "0.1"
+}
