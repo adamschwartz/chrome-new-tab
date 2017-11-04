@@ -967,13 +967,32 @@ function loadColumns() {
     verifyColumns();
     renderColumns();
   } else {
+    // TODO
+    // chrome.bookmarks.getTree(function(result) {
+    //   // init root nodes
+    //   var nodes = result[0].children;
+    //   root = special.slice(0);
+
+    //   for (var i = 0; i < nodes.length; i++)
+    //     root.push(nodes[i].id);
+
+    //   verifyColumns();
+    //   renderColumns();
+    // });
+
     chrome.bookmarks.getTree(function(result) {
       // init root nodes
       var nodes = result[0].children;
-      root = special.slice(0);
+      root = []; // TODO
 
-      for (var i = 0; i < nodes.length; i++)
-        root.push(nodes[i].id);
+      for (var i = 0; i < nodes.length; i++) {
+        // TODO
+        if (nodes[i].title === 'Bookmarks Bar') {
+          root.push(nodes[i].id);
+        }
+      }
+
+      root.push('devices'); // TODO - setting?
 
       verifyColumns();
       renderColumns();
@@ -1473,7 +1492,13 @@ function initSettings() {
     var nodes = result[0].children;
     for (var i = 0; i < nodes.length; i++) {
       var key = 'show_' + nodes[i].id;
-      config[key] = 1;
+
+      // TODO
+      if (nodes[i].title === 'Bookmarks Bar') {
+        config[key] = 1;
+      } else {
+        config[key] = 0;
+      }
 
       var span = document.createElement('span');
       span.innerText = nodes[i].title;
@@ -1492,8 +1517,9 @@ function initSettings() {
     settingsInitialized = true;
 
     // show settings
-    for (var key in config)
+    for (var key in config) {
       initConfig(key);
+    }
 
     loadSettings();
   });
