@@ -1510,7 +1510,11 @@ function initSettings() {
       var label = document.createElement('label');
       label.appendChild(span);
       label.appendChild(input);
-      placeholder.appendChild(label);
+
+      // TODO
+      if (placeholder) {
+        placeholder.appendChild(label);
+      }
     }
 
     // all input elements for options should be in place

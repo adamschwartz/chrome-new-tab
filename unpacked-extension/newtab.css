@@ -9,6 +9,7 @@ body {
 }
 
 * {
+  font: inherit;
   box-sizing: inherit;
 }
 
@@ -118,57 +119,21 @@ body {
 }
 #options {
   display: none;
-  font-size: 1.4em;
-  color: #000;
-  border: solid #999;
-  border-width: 0 0 1px 1px;
   border-bottom-left-radius: 3px;
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
-  min-width: 32em;
-  min-height: 10em;
+  box-shadow: 0 0 0 .5px #ccc;
+  background: #f6f6f6;
 }
 #options:target {
   display: block;
 }
 #options_nav {
   position: absolute;
-  width: 10em;
-  top: -1px;
-  bottom: 0;
-  background-color: #EEE;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-right: solid 1px #ccc;
-}
-#options_nav a {
-  display: block;
-  padding: 1em 2em;
-  text-decoration: none;
-  color: inherit;
-  border: solid transparent;
-  border-width: 1px 0;
-}
-#options_nav a:hover {
-  background-color: #E4F4FF;
-  outline: solid thin #57B0FF;
-}
-#options_nav a.current {
-  color: #000;
-  background-color: #FAFAFA;
-  border-color: #CCC;
-  margin-right: -1px;
-  outline: none;
+  top: -99999px;
+  opacity: 0;
+  pointer-events: none;
 }
 #options .section {
-  margin-left: 10em;
-  margin-top: -1px;
-  padding: 1px 0;
-  background-color: #FAFAFA;
-  display: none;
-}
-#options .section.current {
-  display: block;
+  border-bottom-left-radius: 3px;
 }
 #options_button {
   background: transparent no-repeat center center;
@@ -180,29 +145,29 @@ body {
   opacity: 1;
 }
 #options_close_button {
-  color: #000;
+  color: #5a5a5a;
+  font-family: "Helvetica Neue";
+  font-weight: 400;
+  font-size: 19px;
   text-align: center;
   text-decoration: none;
-  font-size: 1.4em;
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 1px;
+  right: 2px;
   display: block;
   width: 32px;
   height: 32px;
   line-height: 32px;
 }
-legend {
+.legend {
   color: #888;
 }
-fieldset {
-  border: none;
-  margin: 1em .5em 1em 2em;
-  padding: .5em 0 0;
+.fieldset {
+  padding: .8em 1.2em 1.1em;
+  margin: 0;
 }
 label {
   display: block;
-  font-size: 0.85em;
   text-align: right;
   margin: 0 0 .1em 1.4em;
   clear: left;
@@ -222,7 +187,6 @@ input, select, textarea, .revert {
 textarea {
   width: 20em;
   height: 16em;
-  font-size: 1.1em;
   font-family: monospace;
   vertical-align: top;
   float: left;
