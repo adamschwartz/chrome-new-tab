@@ -91,7 +91,7 @@ function renderAll(nodes, target, toplevel) {
 // render column with given index
 function renderColumn(index, target) {
   var ids = columns[index];
-  if (ids.length == 1 && ids[0] != 'weather' && !getConfig('show_root'))
+  if (ids.length == 1 && !getConfig('show_root'))
     getChildrenFunction({id: ids[0]})(function(result) {
       renderAll(result, target);
       addColumnHandlers(index, target);
@@ -398,20 +398,12 @@ function addColumnHandlers(index, ul) {
 // gets context menu items for given node
 function getMenuItems(node) {
   var items = [];
-  if (node.id == 'weather')
-    items.push({
-      label: 'Update weather',
-      action: function() {
-        refreshWeather();
-      }
-    });
-  else
-    items.push({
-      label: 'Open all links in folder',
-      action: function() {
-        openLinks(node);
-      }
-    });
+  items.push({
+    label: 'Open all links in folder',
+    action: function() {
+      openLinks(node);
+    }
+  });
   if (node.id == 'closed')
     items.push({
       label: 'Clear browsing data',
@@ -725,17 +717,6 @@ function getChildrenFunction(node) {
           callback(result);
         });
       };
-    case 'weather':
-      if (node.children)
-        return function(callback) {
-          callback(node.children);
-        };
-      else
-        return function(callback) {
-          getWeather(function(result) {
-            callback(result[0].children);
-          });
-        };
     default:
       if  (node.children)
         return function(callback) {
@@ -774,11 +755,6 @@ function getSubTree(id, callback) {
     case 'devices':
       callback([{ title: 'Other devices', id: 'devices', children: true }]);
       break;
-    case 'weather':
-      getWeather(function(result) {
-        callback(result);
-      });
-      break;
     default:
       chrome.bookmarks.getSubTree(id, function(result) {
         if (result)
@@ -809,7 +785,6 @@ function setClass(target, node, isopen) {
     case 'recent':
     case 'closed':
     case 'devices':
-    case 'weather':
     case 'empty':
       target.classList.add(node.id);
   }
@@ -895,34 +870,17 @@ function animate(node, a, isopen) {
   // TODO: fix nested animations
   // wrapper needed for inner height value
   var wrap = a.nextSibling;
-  if (a.toggleAction) {
-    // clear last animation
-    clearTimeout(a.toggleHandle);
-    a.toggleAction = null;
-  } else {
-    // start animation
-    wrap.style.height = isopen ? wrap.firstChild.clientHeight + 'px' : 0;
-    wrap.style.opacity = isopen ? 1 : 0;
-  }
-
-  setTimeout(function() {
-    wrap.className = 'wrap';
-    wrap.style.height = isopen ? 0 : wrap.firstChild.clientHeight + 'px';
-    wrap.style.opacity = isopen ? 0 : 1;
-    wrap.style.pointerEvents = isopen ? 'none' : null;
-  }, 0);
+  wrap.className = 'wrap ' + (isopen ? 'wrap-is-close' : 'wrap-is-open');
 
   a.toggleAction = function() {
     if (isopen)
       a.parentNode.removeChild(wrap);
     else {
       wrap.className = null;
-      wrap.removeAttribute('style');
     }
-    a.toggleAction = null;
   };
   var duration = scale(getConfig('slide'), .2, 1) * 1000;
-  a.toggleHandle = setTimeout(a.toggleAction, duration);
+  a.toggleHandle = a.toggleAction;
 }
 
 // opens immediate children of given node in new tabs
@@ -951,7 +909,7 @@ function openLink(node, newtab) {
 var columns; // columns[x][y] = id
 var root; // root[] = id
 var coords; // coords[id] = {x:x, y:y}
-var special = ['top', 'apps', 'recent', 'weather', 'closed', 'devices'];
+var special = ['top', 'apps', 'recent', 'closed', 'devices'];
 
 // ensure root folders are included
 function verifyColumns() {
@@ -1114,10 +1072,11 @@ var appsOrder;
 function getApps(callback) {
   chrome.management.getAll(function(result) {
     result = result.filter(function(a) {
-      return a.enabled && a.type !== 'extension' && a.type !== 'theme' && a.isApp !== false &&
-        a.id !== 'nmmhkkegccagdldgiimedpiccmgmieda';// hide "Google Wallet Service"
+      return a.enabled && a.type !== 'extension' && a.isApp !== false &&
+        a.id !== 'nmmhkkegccagdldgiimedpiccmgmieda'; // hide "Google Wallet Service" // TODO
     });
 
+    // TODO
     result.push({
       id: 'webstore',
       name: 'Chrome Web Store',
@@ -1226,165 +1185,27 @@ function refreshClosed() {
   });
 }
 
-// gets weather info from yahoo weather
-function getWeather(callback) {
-  // check cache (30 minute expiry)
-  var cached = JSON.parse(localStorage.getItem('weather.cache'));
-  if (cached && new Date() - new Date(cached.date) < 1000 * 60 * 30) {
-    callback(cached.data);
-    return;
-  }
-  var onerror = function(event) {
-    console.log(event);
-    var targets = document.getElementsByClassName('weather');
-    for (var i = 0; i < targets.length; i++){
-      targets[i].childNodes[1].nodeValue = 'Error loading weather';
-      targets[i].classList.add('error');
-    }
-  };
-  var locId = getConfig('weather_location_id');
-  if (!locId) {
-    var loc = getConfig('weather_location');
-    if (!loc) {
-      // no location
-      callback([{ id: 'weather', title: 'Location unknown', icon: 'http://l.yimg.com/a/i/us/we/52/3200.gif', action: function() {
-        location.hash = '#options';
-        document.getElementById('options_weather_location').focus();
-        return false;
-      } }]);
-      return;
-    }
-  }
-  // show cached (2 hours) or loading...
-  if (cached && new Date() - new Date(cached.date) < 1000 * 60 * 120) {
-    callback(cached.data);
-  } else {
-    callback([{ id: 'weather', title: 'Loading weather...', children: true }]);
-  }
-
-  if (locId) {
-    getForecast(locId, onerror);
-  } else {
-    getLocationId(loc, function(locId) {
-      getForecast(locId, onerror);
-    }, onerror);
-  }
-}
-
-function getForecast(locId, onerror) {
-  var query = 'select * from weather.forecast where woeid="' + locId + '" and u="' + getConfig('weather_units') + '" limit 1';
-  var url = 'http://query.yahooapis.com/v1/public/yql?format=json&q=' + encodeURIComponent(query);
-  var request = new XMLHttpRequest();
-  request.onload = function(event) {
-    try {
-      var nodes = [];
-      var response = JSON.parse(request.response).query.results.channel;
-
-      // current conditions
-      var current = response.item.condition;
-      var parentnode = {
-        id: 'weather',
-        title: current.temp + '°' + (getConfig('weather_units') == 'c' ? 'C' : 'F') + ' ' + current.text,
-        tooltip: response.item.title,
-        icon: 'http://l.yimg.com/a/i/us/we/52/' + current.code + '.gif'
-      };
-
-      // forecast
-      var forecast = response.item.forecast;
-      for (var i = 0; i < forecast.length && i < 5; i++) {
-        nodes.push({
-          title: forecast[i].day + ' ' +
-            forecast[i].high + '°, ' +
-            forecast[i].low + '° ' +
-            forecast[i].text,
-          icon: 'http://l.yimg.com/a/i/us/we/52/' + forecast[i].code + '.gif'
-        });
-      }
-      parentnode.children = nodes;
-      refreshWeather([parentnode], url);
-    } catch (e) {
-      onerror(e);
-    }
-  };
-  request.onerror = onerror;
-  request.open('GET', url + '&' + Date.now(), true);
-  request.send();
-}
-
-function getLocationId(text, callback, onerror) {
-  var query = 'select woeid from geo.places where text="' + text + '" and focus="" limit 1';
-  var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' + encodeURIComponent(query);
-  var request = new XMLHttpRequest();
-  request.onload = function() {
-    var response = JSON.parse(request.response);
-    if (response && response.query && response.query.results && response.query.results.place && response.query.results.place.woeid) {
-      var woeid = response.query.results.place.woeid;
-      setConfig('weather_location_id', woeid);
-      callback(woeid);
-    } else {
-      onerror(response);
-    }
-  };
-  request.onerror = onerror;
-  request.open('GET', url + '&' + Date.now(), true);
-  request.send();
-}
-
-// refreshes weather items
-function refreshWeather(data, url) {
-  // cache data
-  if (data)
-    localStorage.setItem('weather.cache', JSON.stringify({
-      data: data,
-      url: url,
-      date: new Date()
-    }));
-  else
-    localStorage.removeItem('weather.cache');
-  // render
-  var targets = document.getElementsByClassName('weather');
-  for (var i = 0; i < targets.length; i++) {
-    var target = targets[i].parentNode;
-    getSubTree('weather', function(result) {
-      var li = render(result[0], target.parentNode, 'weather');
-      target.parentNode.replaceChild(li, target);
-    });
-  }
-}
-
 // options : default values
 var config = {
-  font: 'Sans-serif',
-  font_size: 16,
-  theme: 'Default',
-  font_color: '#555555',
+  font: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
+  font_size: 12,
+  font_color: '#000000',
   background_color: '#ffffff',
-  highlight_color: '#e4f4ff',
+  highlight_color: '#ebebeb',
   highlight_font_color: '#000000',
-  shadow_color: '#57b0ff',
-  background_image_file: '',
-  background_image: '',
-  background_align: 'left top',
-  background_repeat: 'repeat',
-  background_size: 'auto',
-  shadow_blur: 1,
+  shadow_color: '#ffffff',
+  shadow_blur: 0,
   highlight_round: 1,
-  fade: 1,
   spacing: 1,
   width: 1,
   h_pos: 1,
   v_margin: 1,
-  slide: 1,
-  hide_options: 0,
+  hide_options: 1,
   lock: 0,
-  weather_location: '',
-  weather_location_id: '',
-  weather_units: 'c',
-  show_top: 1,
-  show_apps: 1,
-  show_recent: 1,
-  show_weather: 1,
-  show_closed: 1,
+  show_top: 0,
+  show_apps: 0,
+  show_recent: 0,
+  show_closed: 0,
   show_devices: 1,
   show_root: 0,
   newtab: 0,
@@ -1396,96 +1217,13 @@ var config = {
   number_recent: 10
 };
 
-// color theme values
-var themes = {
-  Default: {},
-  Classic: {
-    font_color: '#000000',
-    background_color: '#ffffff',
-    highlight_color: '#3399ff',
-    highlight_font_color: '#ffffff',
-    shadow_color: '#97cbff'
-  },
-  Dusk: {
-    font_color: '#c8b9be',
-    background_color: '#56546b',
-    highlight_color: '#494d5a',
-    highlight_font_color: '#ffd275',
-    shadow_color: '#000000'
-  },
-  Elegant: {
-    font_color: '#888888',
-    background_color: '#f6f6f6',
-    highlight_color: '#ffffff',
-    highlight_font_color: '#000000',
-    shadow_color: '#aaaaaa'
-  },
-  Frosty: {
-    font_color: '#3e5e82',
-    background_color: '#e4eef3',
-    highlight_color: '#0080c0',
-    highlight_font_color: '#ffffff',
-    shadow_color: '#8080ff'
-  },
-  Hacker: {
-    font_color: '#00ff00',
-    background_color: '#000000',
-    highlight_color: '#00ff00',
-    highlight_font_color: '#000000',
-    shadow_color: '#ff0000'
-  },
-  Melon: {
-    font_color: '#594526',
-    background_color: '#f8ffe1',
-    highlight_color: '#ff8000',
-    highlight_font_color: '#ffff80',
-    shadow_color: '#ff80c0'
-  },
-  Midnight: {
-    font_color: '#bfdfff',
-    background_color: '#101827',
-    highlight_color: '#000000',
-    highlight_font_color: '#80ecff',
-    shadow_color: '#0080ff'
-  },
-  Slate: {
-    font_color: '#555555',
-    background_color: '#b7babf',
-    highlight_color: '#aaaaaa',
-    highlight_font_color: '#000000',
-    shadow_color: '#2a2a2a'
-  },
-  Trees: {
-    font_color: '#cdd088',
-    background_color: '#566157',
-    highlight_color: '#4d674b',
-    highlight_font_color: '#ffff80',
-    shadow_color: '#183010'
-  },
-  Valentine: {
-    font_color: '#895fc2',
-    background_color: '#eae1ff',
-    highlight_color: '#ffb7f0',
-    highlight_font_color: '#f00000',
-    shadow_color: '#ffffff'
-  },
-  Warm: {
-    font_color: '#824100',
-    background_color: '#ffeedd',
-    highlight_color: '#fffae8',
-    highlight_font_color: '#800000',
-    shadow_color: '#d98764'
-  }
-};
-var theme = {};
-
 // get config value or default
 function getConfig(key) {
   var value =  localStorage.getItem('options.' + key);
   if (value != null)
     return typeof config[key] === 'number' ? Number(value) : value;
   else
-    return (theme.hasOwnProperty(key) ? theme[key] : config[key]);
+    return config[key]
 }
 
 // set config value
@@ -1494,24 +1232,11 @@ function setConfig(key, value) {
     localStorage.setItem('options.' + key, typeof config[key] === 'number' ? Number(value) : value);
   else {
     localStorage.removeItem('options.' + key);
-    value = (theme.hasOwnProperty(key) ? theme[key] : config[key]);
+    value = config[key];
   }
   // special case settings
-  if (key == 'lock' || key == 'newtab' || key == 'show_root' || key.substring(0,6) == 'number')
+  if (key == 'lock' || key == 'newtab' || key == 'show_root' || key.substring(0,6) == 'number') {
     loadColumns();
-  else if (key == 'theme') {
-    theme = themes[value];
-    for (var i in config) {
-      if (i != key) {
-        onChange(i);
-        showConfig(i);
-      }
-    }
-  } else if (key.substring(0, 7) == 'weather') {
-    if (key == 'weather_location')
-      setConfig('weather_location_id', null);
-    else
-      refreshWeather();
   } else if (key.substring(0,4) == 'show') {
     var id = key.substring(5);
     if (!value) {
@@ -1530,63 +1255,7 @@ function setConfig(key, value) {
 var styles = {};
 
 function getStyle(key, value) {
-  switch(key) {
-    case 'font':
-      return '#main a { font-family: "' + value + '"; }';
-    case 'font_size':
-      return '#main a { font-size: ' + (value / 10) + 'em; }';
-    case 'font_color':
-      return '#main a { color: ' + value + '; }';
-    case 'background_color':
-      return 'body { background-color: ' + value + '; }';
-    case 'background_image':
-      return 'body { background-image: url(' + value + '); }';
-    case 'background_image_file':
-      return 'body { background-image: url(' + value + '); }';
-    case 'background_align':
-      return 'body { background-position: ' + value + '; }';
-    case 'background_repeat':
-      return 'body { background-repeat: ' + value + '; }';
-    case 'background_size':
-      return 'body { background-size: ' + value + '; }';
-    case 'highlight_font_color':
-      return '#main a:hover { color: ' + value + '; }';
-    case 'highlight_color':
-      return '#main a:hover { background-color: ' + value + '; }';
-    case 'shadow_color':
-      return '#main a:hover { box-shadow: 0 0 ' + scale(getConfig('shadow_blur'), 7, 100) + 'px ' + value + '; }';
-    case 'shadow_blur':
-      return '#main a:hover { box-shadow: 0 0 ' + scale(value, 7, 100) + 'px ' + getConfig('shadow_color') + '; }';
-    case 'highlight_round':
-      return '#main a { border-radius: ' + scale(value, .2, 1.5) + 'em; }';
-    case 'fade':
-      return '#main a { -webkit-transition-duration: ' + scale(value, .2, 1) + 's; }';
-    case 'slide':
-      return '.wrap { -webkit-transition-duration: ' + scale(value, .2, 1) + 's; }';
-    case 'spacing':
-      return '#main a { line-height: ' + scale(value, 2, 5.6, .8) + '; ' +
-              'padding-left: ' + scale(value, .8, 2, .4) + 'em; ' +
-              'padding-right: ' + scale(value, .8, 2, .4) + 'em; }';
-    case 'width':
-      return '#main { width: ' + (getConfig('auto_scale') ?
-        scale(value, 80, 100, 20) + '%' :
-        scale(value, 1000, 3000, 400) + 'px') + '; }';
-    case 'h_pos':
-      var margin = 100 - scale(getConfig('width'), 80, 100, 20);
-      return '#main { left: ' + scale(value, 0, margin/2, -margin/2) + '%; }';
-    case 'v_margin':
-      return '#main { margin-top: ' + (getConfig('auto_scale') ?
-        scale(value, 5, 20) + '%' :
-        scale(value, 80, 600) + 'px') + '; }';
-    case 'hide_options':
-      return '#options_button { opacity: 0; }';
-    case 'css':
-      return value;
-    case 'auto_scale':
-      return value ? null : '#main { margin-top: 80px; width: 1000px; }';
-    default:
-      return null;
-  }
+  return '';
 }
 
 // scales input value from [0,1,2] to [min,mid,max]
@@ -1649,7 +1318,7 @@ function onChange(key, value) {
   // show/hide default button
   var input = document.getElementById('options_' + key);
   if (input) {
-    var isDefault = value == (theme.hasOwnProperty(key) ? theme[key] : config[key]);
+    var isDefault = value == config[key];
     input.reset.style.visibility = (isDefault ? 'hidden' : null);
     if (input.swatch)
       input.swatch.value = value;
@@ -1658,8 +1327,6 @@ function onChange(key, value) {
 
 // loads config settings
 function loadSettings() {
-  // load theme
-  theme = themes[getConfig('theme')] || {};
   // load settings
   for (var key in config)
     if (key === 'background_image_file')
@@ -1775,12 +1442,7 @@ function initSettings() {
       if (index === nav.children.length-2) {
         var exports = document.getElementById('options_export');
         var imports = document.getElementById('options_import');
-        var replacer = function(key, value) {
-          if (key == 'options.background_image_file' || key == 'weather.cache') {
-            return undefined;
-          }
-          return value;
-        };
+        var replacer = function(key, value) { return value }; // TODO
         exports.value = JSON.stringify(localStorage, replacer);
         imports.value = '';
         imports.placeholder = 'Paste exported settings here';
@@ -1826,14 +1488,6 @@ function initSettings() {
       placeholder.appendChild(label);
     }
 
-    // replace text input with system font list
-    if (chrome.fontSettings) {
-      var input = document.getElementById('options_font');
-      var select = document.createElement('select');
-      input.parentNode.replaceChild(select, input);
-      select.id = input.id;
-    }
-
     // all input elements for options should be in place
     settingsInitialized = true;
 
@@ -1842,49 +1496,12 @@ function initSettings() {
       initConfig(key);
 
     loadSettings();
-
-    // load themes
-    var select = document.getElementById('options_theme');
-    if (select.childNodes.length === 0) {
-      for (var i in themes) {
-        var option = document.createElement('option');
-        option.innerText = i;
-        if (i == getConfig('theme'))
-          option.selected = 'selected';
-        select.appendChild(option);
-      }
-    }
-
-    // load font list
-    if (chrome.fontSettings) {
-      chrome.fontSettings.getFontList(function(fonts)  {
-        var select = document.getElementById('options_font');
-        if (select.childNodes.length > 0)
-          return;
-
-        fonts.unshift({ fontId: 'Sans-serif' });
-        for (var i = 0; i < fonts.length; i++) {
-          var font = fonts[i].fontId;
-          var option = document.createElement('option');
-          option.innerText = font;
-          if (font == getConfig('font'))
-            option.selected = 'selected';
-          select.appendChild(option);
-        }
-      });
-    }
   });
 }
 
 // initialize page
 loadSettings();
 loadColumns();
-
-// fix scrollbar jump
-window.onresize = function(event) {
-  document.body.style.width = window.innerWidth + 'px';
-};
-window.onresize();
 
 // load options panel
 window.onhashchange = function(event) {
