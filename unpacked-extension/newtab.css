@@ -117,6 +117,10 @@ body {
   top: 0;
   right: 0;
 }
+#options_button {
+  top: 1px;
+  right: 1px;
+}
 #options {
   display: none;
   border-bottom-left-radius: 3px;
