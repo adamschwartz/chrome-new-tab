@@ -76,7 +76,7 @@ function renderAll(nodes, target, toplevel) {
       render(node, ul);
   }
   if (ul.childNodes.length === 0)
-    render({ id: 'empty', title: '< Empty >' }, ul);
+    render({ id: 'empty', title: '' }, ul);
   if (toplevel)
     target.appendChild(ul);
   else {
