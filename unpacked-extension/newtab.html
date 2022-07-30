@@ -1,50 +1,9 @@
 <!doctype html>
-<html>
-<head>
-<meta charset="utf-8" />
+<meta charset="utf-8">
 <title>New Tab</title>
-<link rel="stylesheet" href="newtab.css">
-</head>
-<body>
-<div id="main">
-</div>
-<a id="options_button" href="#options" title="Options"></a>
-<div id="options">
-  <a id="options_close_button" href="#" title="Close">&times;</a>
-  <ul id="options_nav">
-    <li><a href="#options/settings" class="current">Settings</a></li>
-  </ul>
-  <div class="section current">
-  <div class="fieldset">
-    <div class="legend">Settings</div>
-    <label><span>Open links in&nbsp;</span><select id="options_newtab">
-      <option value="0">current tab</option>
-      <option value="1">new tab</option>
-      <option value="2">new tab (background)</option>
-    </select></label>
-    <!--
-    <label><span>Lock columns</span><input id="options_lock" type="checkbox"/></label>
-    <label><span>Auto-close folders</span><input id="options_auto_close" type="checkbox"/></label>
-    <label><span>Hide options button</span><input id="options_hide_options" type="checkbox"/></label>
-    -->
-    <label><span>Show top-level folders</span><input id="options_show_root" type="checkbox"/></label>
-  </div>
-  <!--
-  <div class="fieldset">
-    <div class="legend">Content</div>
-    <label><span>Apps</span><input id="options_show_apps" type="checkbox"/></label>
-    <div id="options_show_bookmarks"></div>
-    <label><span>Most visited</span><input id="options_show_top" type="checkbox"/></label>
-    <label class="subopt"><span>Number of items</span><input id="options_number_top" type="number" min="1" max="20"/></label>
-    <label><span>Recent bookmarks</span><input id="options_show_recent" type="checkbox"/></label>
-    <label class="subopt"><span>Number of items</span><input id="options_number_recent" type="number" min="1" max="1000"/></label>
-    <label><span>Recently closed</span><input id="options_show_closed" type="checkbox"/></label>
-    <label class="subopt"><span>Number of items</span><input id="options_number_closed" type="number" min="1" max="25"/></label>
-    <label><span>Other devices</span><input id="options_show_devices" type="checkbox"/></label>
-  </div>
-  -->
-  </div>
+<link rel=stylesheet href="newtab.css">
+<div class="bookmarks">
+  <div id="bookmarks-bar"></div>
+  <div id="other-bookmarks"></div>
 </div>
 <script src="newtab.js"></script>
-</body>
-</html>
