@@ -229,10 +229,14 @@ function getIcon(node) {
   } else if (node.icon)
     url = node.icon
   else if (node.url || node.appLaunchUrl) {
-    // See https://bugs.chromium.org/p/chromium/issues/detail?id=104102
     const pageURL = node.url || node.appLaunchUrl
-    url = `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(pageURL)}&size=16`
-    url2x = `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(pageURL)}&size=32`
+    url = 'chrome://favicon/' + pageURL
+    url2x = 'chrome://favicon/size/16@2x/' + pageURL
+    // TODO
+    // Switch to this for manifest v3
+    // See https://bugs.chromium.org/p/chromium/issues/detail?id=104102
+    // url = `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(pageURL)}&size=16`
+    // url2x = `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(pageURL)}&size=32`
   }
 
   var icon = document.createElement(url ? 'img' : 'div')
