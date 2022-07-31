@@ -70,13 +70,13 @@ function render(node, target) {
     a.onclick = function() {
       toggle(node, a, getChildrenFunction(node))
       return false
-    };
+    }
 
     var items = getMenuItems(node)
 
     a.oncontextmenu = event => {
       renderMenu(items, event.pageX, event.pageY)
-      return false;
+      return false
     }
   }
 
@@ -214,21 +214,20 @@ function setClass(target, node, isOpen) {
   }
 }
 
-// gets best icon for a node
 function getIcon(node) {
-  var url, url2x;
+  var url, url2x
   if (node.icons) {
-    var size;
+    var size
     for (var i in node.icons) {
-      var iconInfo = node.icons[i];
+      var iconInfo = node.icons[i]
       if (iconInfo.url && (!size || (iconInfo.size < size && iconInfo.size > 15))) {
-        url = iconInfo.url;
-        if (iconInfo.size > 31) url2x = iconInfo.url;
-        size = iconInfo.size;
+        url = iconInfo.url
+        if (iconInfo.size > 31) url2x = iconInfo.url
+        size = iconInfo.size
       }
     }
   } else if (node.icon)
-    url = node.icon;
+    url = node.icon
   else if (node.url || node.appLaunchUrl) {
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=104102
     const pageURL = node.url || node.appLaunchUrl
@@ -236,12 +235,12 @@ function getIcon(node) {
     url2x = `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(pageURL)}&size=32`
   }
 
-  var icon = document.createElement(url ? 'img' : 'div');
-  icon.className = 'icon';
-  icon.src = url;
-  if (url2x) icon.srcset = url2x + ' 2x';
-  icon.alt = '';
-  return icon;
+  var icon = document.createElement(url ? 'img' : 'div')
+  icon.className = 'icon'
+  icon.src = url
+  if (url2x) icon.srcset = url2x + ' 2x'
+  icon.alt = ''
+  return icon
 }
 
 // toggle folder open state
@@ -260,13 +259,13 @@ function toggle(node, a) {
           child.onclick()
       }
 
-      toggleOpenClose(node, a, isOpen);
+      toggleOpenClose(node, a, isOpen)
     }
 
   } else {
     foldersOpen[node.id] = true
 
-    var siblings = a.parentNode.parentNode.children;
+    var siblings = a.parentNode.parentNode.children
     for (var i = 0; i < siblings.length; i++) {
       var sibling = siblings[i].firstChild
       if (sibling != a && sibling.open)
@@ -287,8 +286,8 @@ function toggle(node, a) {
 }
 
 function toggleOpenClose(node, a, isOpen) {
-  var wrap = a.nextSibling;
-  wrap.className = 'wrap ' + (isOpen ? 'wrap-is-close' : 'wrap-is-open');
+  var wrap = a.nextSibling
+  wrap.className = 'wrap ' + (isOpen ? 'wrap-is-close' : 'wrap-is-open')
 }
 
 // opens immediate children of given node in new tabs
@@ -296,21 +295,21 @@ function openLinks(node) {
   chrome.tabs.getCurrent(function(tab) {
     getChildrenFunction(node)(function(result) {
       for (var i = 0; i < result.length; i++)
-        openLink(result[i], 2);
-    });
-  });
+        openLink(result[i], 2)
+    })
+  })
 }
 
 // opens given node
 function openLink(node, newtab) {
-  var url = node.url || node.appLaunchUrl;
+  var url = node.url || node.appLaunchUrl
   if (url) {
     chrome.tabs.getCurrent(function(tab) {
       if (newtab)
-        chrome.tabs.create({url: url, active: (newtab == 1), openerTabId: tab.id});
+        chrome.tabs.create({url: url, active: (newtab == 1), openerTabId: tab.id})
       else
-        chrome.tabs.update(tab.id, {url: url});
-    });
+        chrome.tabs.update(tab.id, {url: url})
+    })
   }
 }
 
