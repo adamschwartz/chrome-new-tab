@@ -234,7 +234,10 @@ function getIcon(node) {
   } else if (node.icon)
     url = node.icon
   else if (node.url || node.appLaunchUrl) {
-    const pageURL = node.url || node.appLaunchUrl
+    let pageURL = node.url || node.appLaunchUrl
+    if (!pageURL || pageURL.substr(0,11)==='javascript:') {
+      pageURL = 'https://example.com'
+    }
     url = 'chrome://favicon/' + pageURL
     url2x = 'chrome://favicon/size/16@2x/' + pageURL
     // TODO
