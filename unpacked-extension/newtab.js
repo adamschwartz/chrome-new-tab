@@ -172,7 +172,12 @@ const closeOpenFolders = (scopeElement = document.body) => {
 }
 
 document.body.addEventListener('mousedown', event => {
+  if (event.target.tagName === 'A' && event.target.href) {
+    return
+  }
+
   const closestFolder = event.target.closest('.folder')
+
   if (!closestFolder) {
     closeOpenFolders()
   } else {
