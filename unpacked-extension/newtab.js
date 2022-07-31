@@ -250,7 +250,7 @@ function getIcon(node) {
   var icon = document.createElement(url ? 'img' : 'div')
   icon.className = 'icon'
   icon.src = url
-  if (url2x) icon.srcset = url2x + ' 2x'
+  if (url && url2x) icon.srcset = url2x + ' 2x'
   icon.alt = ''
   return icon
 }
