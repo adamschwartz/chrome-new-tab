@@ -231,15 +231,21 @@ function getIcon(node) {
         size = iconInfo.size
       }
     }
-  } else if (node.icon)
+
+  } else if (node.icon) {
     url = node.icon
-  else if (node.url || node.appLaunchUrl) {
+
+  } else if (node.url || node.appLaunchUrl) {
     let pageURL = node.url || node.appLaunchUrl
-    if (!pageURL || pageURL.substr(0,11)==='javascript:') {
+    pageURL = pageURL.replace(/ /g, '%20')
+
+    if (!pageURL || pageURL.substr(0, 11) === 'javascript:' || pageURL.substr(0, 5) === 'data:') {
       pageURL = 'https://example.com'
     }
+
     url = 'chrome://favicon/' + pageURL
     url2x = 'chrome://favicon/size/16@2x/' + pageURL
+
     // TODO
     // Switch to this for manifest v3
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=104102
