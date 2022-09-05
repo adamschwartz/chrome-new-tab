@@ -1,5 +1,3 @@
-<img width=64 src=https://raw.github.com/adamschwartz/chrome-new-tab/master/unpacked-extension/icons/icon128.png>
-
 ## Chrome New Tab
 
 ### On the Chrome Web Store
