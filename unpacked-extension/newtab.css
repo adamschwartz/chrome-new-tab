@@ -23,14 +23,14 @@ body {
 @media (prefers-color-scheme: dark) {
   body {
     color: #fff;
-    background: #202124;
+    background: #1f2020;
   }
 }
 
 @media (prefers-color-scheme: dark) {
   .bookmarks {
-    background: #35363a;
-    border-bottom: .5px solid #606164;
+    background: #3c3c3c;
+    border-bottom: 1px solid #454746;
   }
 }
 
