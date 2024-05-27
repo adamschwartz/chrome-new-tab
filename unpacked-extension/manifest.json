@@ -14,10 +14,7 @@
   "permissions": [
     "favicon",
     "bookmarks",
-    "topSites",
-    "management",
-    "tabs",
-    "sessions"
+    "tabs"
   ],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
