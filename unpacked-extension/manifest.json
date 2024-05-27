@@ -1,9 +1,9 @@
 {
   "author": "Adam Schwartz",
   "name": "New Tab",
-  "version": "14.0",
-  "manifest_version": 2,
-  "minimum_chrome_version": "103",
+  "version": "15.0",
+  "manifest_version": 3,
+  "minimum_chrome_version": "110",
   "description": "A minimalist replacement for Chrome's New Tab page.",
   "icons": {
     "128": "icons/icon128.png",
@@ -12,13 +12,14 @@
     "16": "icons/icon16.png"
   },
   "permissions": [
+    "favicon",
     "bookmarks",
-    "chrome://favicon/"
+    "topSites",
+    "management",
+    "tabs",
+    "sessions"
   ],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
-  },
-  "web_accessible_resources": [
-    "newtab.html"
-  ]
+  }
 }
