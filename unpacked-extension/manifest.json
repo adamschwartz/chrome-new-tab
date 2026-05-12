@@ -1,9 +1,9 @@
 {
   "author": "Adam Schwartz",
   "name": "New Tab",
-  "version": "15.0",
+  "version": "100.0",
   "manifest_version": 3,
-  "minimum_chrome_version": "110",
+  "minimum_chrome_version": "148",
   "description": "A minimalist replacement for Chrome's New Tab page.",
   "icons": {
     "128": "icons/icon128.png",
